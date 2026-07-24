@@ -25,6 +25,16 @@
       <input id="create-name" type="text" placeholder="e.g. Anuar" maxlength="20" autocomplete="off" />
       <label for="create-stack">Starting stack per player</label>
       <input id="create-stack" type="number" value="1000" min="1" inputmode="numeric" />
+      <div class="blind-row">
+        <div>
+          <label for="create-sb">Small blind</label>
+          <input id="create-sb" type="number" value="5" min="0" inputmode="numeric" />
+        </div>
+        <div>
+          <label for="create-bb">Big blind</label>
+          <input id="create-bb" type="number" value="10" min="1" inputmode="numeric" />
+        </div>
+      </div>
       <button id="create-btn" class="primary">Create Table</button>
     </div>
 
@@ -48,8 +58,13 @@
       <span class="pot-label-text">POT</span>
       <span id="pot-label" class="pot-value">0</span>
     </div>
-    <div class="to-call-pill">To call <span id="call-label">0</span></div>
+    <div class="to-call-pill">Bet <span id="call-label">0</span></div>
   </header>
+
+  <div class="street-banner">
+    <span id="phase-label" class="phase-pill">Waiting</span>
+    <span id="turn-label" class="turn-text">Between hands</span>
+  </div>
 
   <section class="players-section">
     <ul id="players-list"></ul>
@@ -72,8 +87,8 @@
   </div>
 
   <div class="card hand-controls">
-    <button id="btn-award" class="secondary award">&#127942; Award Pot to Winner(s)</button>
-    <button id="btn-new-hand" class="secondary subtle">Next Hand (no winner)</button>
+    <button id="btn-start" class="primary start">Deal First Hand</button>
+    <button id="btn-award" class="secondary award hidden">&#127942; Award Pot to Winner(s)</button>
   </div>
 
   <div class="card log-card">
