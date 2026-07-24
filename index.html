@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Poker Chips</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="home-screen" class="screen home">
+  <div class="brand">
+    <div class="brand-chip">&#9827;</div>
+    <h1>Poker Chips</h1>
+    <p class="tagline">Track the money. Deal the cards yourself.</p>
+  </div>
+
+  <div class="home-cards">
+    <div class="card">
+      <h2><span class="ico">&#127183;</span> Create a table</h2>
+      <label for="create-name">Your name</label>
+      <input id="create-name" type="text" placeholder="e.g. Anuar" maxlength="20" autocomplete="off" />
+      <label for="create-stack">Starting stack per player</label>
+      <input id="create-stack" type="number" value="1000" min="1" inputmode="numeric" />
+      <button id="create-btn" class="primary">Create Table</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">&#128273;</span> Join a table</h2>
+      <label for="join-name">Your name</label>
+      <input id="join-name" type="text" placeholder="e.g. Anuar" maxlength="20" autocomplete="off" />
+      <label for="join-code">Room code</label>
+      <input id="join-code" type="text" placeholder="AB12" maxlength="4" class="code-input" autocomplete="off" autocapitalize="characters" />
+      <button id="join-btn" class="primary">Join Table</button>
+    </div>
+  </div>
+
+  <p id="home-error" class="error"></p>
+</div>
+
+<div id="table-screen" class="screen table hidden">
+  <header class="table-header">
+    <button id="room-code-label" class="room-pill" title="Tap to copy invite link">Room <span id="room-code-value"></span></button>
+    <div class="pot-display">
+      <span class="pot-label-text">POT</span>
+      <span id="pot-label" class="pot-value">0</span>
+    </div>
+    <div class="to-call-pill">To call <span id="call-label">0</span></div>
+  </header>
+
+  <section class="players-section">
+    <ul id="players-list"></ul>
+  </section>
+
+  <div id="action-panel" class="card action-card">
+    <div class="action-buttons">
+      <button id="btn-check" class="action check">Check</button>
+      <button id="btn-call" class="action call">Call</button>
+      <button id="btn-fold" class="action fold">Fold</button>
+    </div>
+    <div class="raise-row">
+      <input id="raise-amount" type="number" placeholder="Raise to…" inputmode="numeric" />
+      <button id="btn-raise" class="action raise">Raise</button>
+    </div>
+    <div class="extra-row">
+      <input id="chips-amount" type="number" placeholder="Add chips…" inputmode="numeric" />
+      <button id="btn-add-chips" class="ghost">Add Chips</button>
+    </div>
+  </div>
+
+  <div class="card hand-controls">
+    <button id="btn-award" class="secondary award">&#127942; Award Pot to Winner(s)</button>
+    <button id="btn-new-hand" class="secondary subtle">Next Hand (no winner)</button>
+  </div>
+
+  <div class="card log-card">
+    <h3><span class="ico">&#128220;</span> Activity</h3>
+    <ul id="log-list"></ul>
+  </div>
+</div>
+
+<div id="award-modal" class="modal hidden">
+  <div class="modal-content">
+    <h3>&#127942; Who won the pot?</h3>
+    <ul id="award-players-list"></ul>
+    <div class="modal-actions">
+      <button id="award-cancel" class="secondary subtle">Cancel</button>
+      <button id="award-confirm" class="primary">Award Pot</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
