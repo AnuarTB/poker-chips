@@ -257,6 +257,38 @@ function showTableScreen() {
   document.getElementById("room-code-value").textContent = roomCode;
 }
 
+function showHomeScreen() {
+  tableScreen.classList.add("hidden");
+  tableScreen.classList.remove("spectator-view");
+  homeScreen.classList.remove("hidden");
+  showHomeError("");
+}
+
+// Leave the table: remove yourself, then return to the home screen.
+async function leaveTable() {
+  if (!roomCode) return;
+  if (!confirm("Leave this table?")) return;
+  const code = roomCode;
+  try {
+    if (isSpectator) {
+      if (spectatorId) await set(ref(db, `rooms/${code}/spectators/${spectatorId}`), null);
+    } else if (myPlayerId) {
+      await removePlayer(myPlayerId);
+    }
+  } catch (e) {
+    // Ignore transient errors — we're leaving regardless.
+  }
+  if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+  localStorage.removeItem(storageKey(code));
+  roomCode = null;
+  myPlayerId = null;
+  isSpectator = false;
+  spectatorId = null;
+  spectatorName = "";
+  latestState = null;
+  showHomeScreen();
+}
+
 function subscribe(code) {
   if (unsubscribe) unsubscribe();
   unsubscribe = onValue(roomRef(code), (snap) => {
@@ -539,7 +571,7 @@ function setBlinds(sb, bb) {
 }
 
 function removePlayer(id) {
-  runTransaction(roomRef(roomCode), (room) => {
+  return runTransaction(roomRef(roomCode), (room) => {
     if (!room || !room.players || !room.players[id]) return room;
     const name = room.players[id].name;
     const live = isPlayable(room);
@@ -748,6 +780,8 @@ document.getElementById("btn-add-chips").addEventListener("click", () => {
 
 document.getElementById("btn-start").addEventListener("click", startHand);
 document.getElementById("btn-take-seat").addEventListener("click", takeSeat);
+document.getElementById("btn-leave").addEventListener("click", leaveTable);
+document.getElementById("btn-leave-spec").addEventListener("click", leaveTable);
 
 // --- host: adjust blinds ---
 const blindsModal = document.getElementById("blinds-modal");
