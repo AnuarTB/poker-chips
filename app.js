@@ -621,6 +621,7 @@ function render() {
   }
 
   // Spectators get a read-only view: hide every control.
+  tableScreen.classList.toggle("spectator-view", isSpectator);
   document.getElementById("spectator-banner").classList.toggle("hidden", !isSpectator);
   document.getElementById("action-panel").classList.toggle("hidden", isSpectator);
   document.querySelector(".hand-controls").classList.toggle("hidden", isSpectator);
