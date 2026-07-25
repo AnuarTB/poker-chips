@@ -780,6 +780,7 @@ document.getElementById("btn-add-chips").addEventListener("click", () => {
 
 document.getElementById("btn-start").addEventListener("click", startHand);
 document.getElementById("btn-take-seat").addEventListener("click", takeSeat);
+document.getElementById("btn-leave").addEventListener("click", leaveTable);
 document.getElementById("btn-leave-spec").addEventListener("click", leaveTable);
 
 // --- host: adjust blinds ---
