@@ -397,3 +397,47 @@ button.ghost {
 @media (hover: none) {
   .action-card { position: sticky; }
 }
+
+/* ---------- Spectator board: wide landscape layout (iPad on a stand) ---------- */
+@media (min-width: 900px) {
+  .screen.table.spectator-view {
+    max-width: 1200px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    column-gap: 24px;
+    align-content: start;
+    padding: 24px 28px calc(24px + env(safe-area-inset-bottom));
+  }
+  .spectator-view .table-header,
+  .spectator-view .street-banner,
+  .spectator-view #spectator-banner { grid-column: 1 / -1; }
+
+  .spectator-view .players-section { grid-column: 1; margin-bottom: 0; }
+  .spectator-view .log-card {
+    grid-column: 2;
+    align-self: start;
+    margin-bottom: 0;
+    max-height: none;
+  }
+  .spectator-view .log-card #log-list { max-height: 60vh; }
+
+  /* Bigger, readable-from-across-the-room typography. */
+  .spectator-view .pot-value { font-size: 68px; }
+  .spectator-view .pot-label-text { font-size: 14px; }
+  .spectator-view .room-pill,
+  .spectator-view .to-call-pill { font-size: 16px; }
+
+  .spectator-view .street-banner { padding: 14px 20px; }
+  .spectator-view .phase-pill { font-size: 15px; padding: 7px 16px; }
+  .spectator-view .turn-text { font-size: 22px; }
+
+  .spectator-view #players-list {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 14px;
+  }
+  .spectator-view #players-list li { padding: 18px 20px; }
+  .spectator-view .player-name { font-size: 21px; }
+  .spectator-view .player-stack { font-size: 24px; }
+  .spectator-view .player-contrib { font-size: 14px; }
+  .spectator-view .player-name .tag { font-size: 12px; padding: 3px 9px; }
+}
