@@ -765,17 +765,41 @@ function escapeHtml(str) {
 document.getElementById("create-btn").addEventListener("click", () => withBusy("create-btn", createRoom));
 document.getElementById("join-btn").addEventListener("click", () => withBusy("join-btn", joinRoom));
 
-document.getElementById("room-code-label").addEventListener("click", async () => {
-  const link = `${location.origin}${location.pathname}#${roomCode}`;
-  const pill = document.getElementById("room-code-label");
-  const original = pill.innerHTML;
+// --- invite: QR code + copyable link ---
+function inviteLink() {
+  return `${location.origin}${location.pathname}#${roomCode}`;
+}
+function buildQR(text, box) {
+  box.innerHTML = "";
   try {
-    await navigator.clipboard.writeText(link);
-    pill.textContent = "Link copied!";
-  } catch {
-    pill.textContent = link;
+    const qr = window.qrcode(0, "M");
+    qr.addData(text);
+    qr.make();
+    box.innerHTML = qr.createImgTag(6, 4); // cellSize, quiet-zone margin
+  } catch (e) {
+    box.textContent = "QR unavailable";
   }
-  setTimeout(() => { pill.innerHTML = original; }, 1500);
+}
+const inviteModal = document.getElementById("invite-modal");
+document.getElementById("room-code-label").addEventListener("click", () => {
+  if (!roomCode) return;
+  const link = inviteLink();
+  document.getElementById("invite-code-value").textContent = roomCode;
+  document.getElementById("invite-link").textContent = link;
+  buildQR(link, document.getElementById("qr-box"));
+  inviteModal.classList.remove("hidden");
+});
+document.getElementById("invite-close").addEventListener("click", () => inviteModal.classList.add("hidden"));
+document.getElementById("invite-copy").addEventListener("click", async () => {
+  const btn = document.getElementById("invite-copy");
+  try {
+    await navigator.clipboard.writeText(inviteLink());
+    const original = btn.textContent;
+    btn.textContent = "Copied!";
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  } catch {
+    // Clipboard blocked — the link is shown above for manual copy.
+  }
 });
 
 document.getElementById("btn-check").addEventListener("click", doCheck);

@@ -54,7 +54,7 @@
 
 <div id="table-screen" class="screen table hidden">
   <header class="table-header">
-    <button id="room-code-label" class="room-pill" title="Tap to copy invite link">Room <span id="room-code-value"></span></button>
+    <button id="room-code-label" class="room-pill" title="Tap to show invite QR &amp; link">Room <span id="room-code-value"></span></button>
     <div class="pot-display">
       <span class="pot-label-text">POT</span>
       <span id="pot-label" class="pot-value">0</span>
@@ -110,6 +110,20 @@
   </div>
 </div>
 
+<div id="invite-modal" class="modal hidden">
+  <div class="modal-content invite-content">
+    <h3>&#128242; Invite players</h3>
+    <p class="invite-sub">Scan to join &mdash; on the same Wi-Fi / hotspot.</p>
+    <div id="qr-box" class="qr-box"></div>
+    <p class="invite-code">Room <span id="invite-code-value"></span></p>
+    <p id="invite-link" class="invite-link"></p>
+    <div class="modal-actions">
+      <button id="invite-close" class="secondary subtle">Close</button>
+      <button id="invite-copy" class="primary">Copy link</button>
+    </div>
+  </div>
+</div>
+
 <div id="blinds-modal" class="modal hidden">
   <div class="modal-content">
     <h3>&#128176; Adjust blinds</h3>
@@ -147,6 +161,7 @@
   </div>
 </div>
 
+<script src="qrcode.js"></script>
 <script type="module" src="app.js"></script>
 </body>
 </html>
