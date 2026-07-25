@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import {
-  getDatabase, ref, get, set, onValue, runTransaction,
+  getDatabase, ref, get, set, onValue, onDisconnect, runTransaction,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -25,6 +25,9 @@ let myPlayerId = null;
 let roomCode = null;
 let latestState = null;
 let unsubscribe = null;
+let isSpectator = false;
+let spectatorId = null;
+let spectatorName = "";
 
 const STREETS = ["preflop", "flop", "turn", "river"];
 const STREET_LABEL = {
@@ -176,13 +179,40 @@ async function createRoom() {
 async function joinRoom() {
   const name = document.getElementById("join-name").value.trim();
   const code = document.getElementById("join-code").value.trim().toUpperCase();
-  if (!name) return showHomeError("Enter your name");
+  const asSpectator = document.getElementById("join-spectator").checked;
+  if (!asSpectator && !name) return showHomeError("Enter your name");
   if (!code || code.length !== 4) return showHomeError("Enter a valid 4-character room code");
 
   const snap = await get(roomRef(code));
   if (!snap.exists()) return showHomeError("Room not found");
 
-  await enterRoom(code, name);
+  if (asSpectator) {
+    await enterAsSpectator(code, name || "Spectator");
+  } else {
+    await enterRoom(code, name);
+  }
+}
+
+async function enterAsSpectator(code, name) {
+  roomCode = code;
+  isSpectator = true;
+  spectatorId = genId();
+  spectatorName = name;
+  const specRef = ref(db, `rooms/${code}/spectators/${spectatorId}`);
+  await set(specRef, { name, joined_at: Date.now() });
+  onDisconnect(specRef).remove(); // drop the watcher when the tab closes
+  subscribe(code);
+  showTableScreen();
+}
+
+async function takeSeat() {
+  if (!roomCode) return;
+  if (spectatorId) {
+    await set(ref(db, `rooms/${roomCode}/spectators/${spectatorId}`), null);
+    spectatorId = null;
+  }
+  isSpectator = false;
+  await enterRoom(roomCode, spectatorName || "Player");
 }
 
 async function enterRoom(code, name) {
@@ -541,6 +571,12 @@ function render() {
   }
   turnText.classList.toggle("mine", !!myTurn);
 
+  // Watchers count.
+  const watchers = Object.keys(room.spectators || {}).length;
+  const watchPill = document.getElementById("watchers-pill");
+  watchPill.classList.toggle("hidden", watchers === 0);
+  document.getElementById("watchers-count").textContent = String(watchers);
+
   const toCall = me ? Math.max(0, (room.street_bet || 0) - (me.street_contributed || 0)) : 0;
   document.getElementById("btn-call").textContent = toCall > 0 ? `Call ${money(toCall)}` : "Check";
 
@@ -583,6 +619,12 @@ function render() {
     li.textContent = entry;
     logList.appendChild(li);
   }
+
+  // Spectators get a read-only view: hide every control.
+  document.getElementById("spectator-banner").classList.toggle("hidden", !isSpectator);
+  document.getElementById("action-panel").classList.toggle("hidden", isSpectator);
+  document.querySelector(".hand-controls").classList.toggle("hidden", isSpectator);
+  if (isSpectator) return;
 
   // Action panel — enabled only on your turn.
   document.getElementById("action-panel").classList.toggle("disabled", !myTurn);
@@ -651,6 +693,7 @@ document.getElementById("btn-add-chips").addEventListener("click", () => {
 });
 
 document.getElementById("btn-start").addEventListener("click", startHand);
+document.getElementById("btn-take-seat").addEventListener("click", takeSeat);
 
 document.getElementById("join-code").addEventListener("keydown", (e) => { if (e.key === "Enter") joinRoom(); });
 document.getElementById("raise-amount").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("btn-raise").click(); });
