@@ -44,6 +44,7 @@
       <input id="join-name" type="text" placeholder="e.g. Anuar" maxlength="20" autocomplete="off" />
       <label for="join-code">Room code</label>
       <input id="join-code" type="text" placeholder="AB12" maxlength="4" class="code-input" autocomplete="off" autocapitalize="characters" />
+      <label class="checkbox-row"><input id="join-spectator" type="checkbox" /> Watch only &mdash; join as spectator</label>
       <button id="join-btn" class="primary">Join Table</button>
     </div>
   </div>
@@ -64,6 +65,12 @@
   <div class="street-banner">
     <span id="phase-label" class="phase-pill">Waiting</span>
     <span id="turn-label" class="turn-text">Between hands</span>
+    <span id="watchers-pill" class="watchers-pill hidden">&#128065; <span id="watchers-count">0</span></span>
+  </div>
+
+  <div id="spectator-banner" class="card spectator-banner hidden">
+    <span>&#128065; You're watching as a spectator</span>
+    <button id="btn-take-seat" class="ghost">Take a seat</button>
   </div>
 
   <section class="players-section">
