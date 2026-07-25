@@ -28,6 +28,7 @@ let unsubscribe = null;
 let isSpectator = false;
 let spectatorId = null;
 let spectatorName = "";
+let busy = false; // guards against double-submitting create/join
 
 const STREETS = ["preflop", "flop", "turn", "river"];
 const STREET_LABEL = {
@@ -143,6 +144,23 @@ function firstAfterButton(room) {
 }
 
 // ---------- create / join ----------
+// Ignore re-entry while a create/join is already running, and disable the
+// button so a burst of taps can't create duplicate rooms or players.
+async function withBusy(btnId, fn) {
+  if (busy) return;
+  busy = true;
+  const btn = document.getElementById(btnId);
+  if (btn) btn.disabled = true;
+  try {
+    await fn();
+  } catch (e) {
+    showHomeError("Something went wrong — try again.");
+  } finally {
+    busy = false;
+    if (btn) btn.disabled = false;
+  }
+}
+
 async function createRoom() {
   const name = document.getElementById("create-name").value.trim();
   const stack = Number(document.getElementById("create-stack").value) || 1000;
@@ -221,6 +239,10 @@ async function enterRoom(code, name) {
   roomCode = code;
   const existing = loadSession(code);
   const pid = (existing && existing.playerId) || genId();
+  // Persist the id up front so a rapid second entry reuses it (the
+  // transaction below is idempotent for an id that already has a seat).
+  myPlayerId = pid;
+  saveSession(code, pid, name);
 
   await runTransaction(roomRef(code), (room) => {
     if (!room) return room;
@@ -245,8 +267,6 @@ async function enterRoom(code, name) {
     return room;
   });
 
-  myPlayerId = pid;
-  saveSession(code, pid, name);
   subscribe(code);
   showTableScreen();
 }
@@ -742,8 +762,8 @@ function escapeHtml(str) {
 }
 
 // ---------- event wiring ----------
-document.getElementById("create-btn").addEventListener("click", createRoom);
-document.getElementById("join-btn").addEventListener("click", joinRoom);
+document.getElementById("create-btn").addEventListener("click", () => withBusy("create-btn", createRoom));
+document.getElementById("join-btn").addEventListener("click", () => withBusy("join-btn", joinRoom));
 
 document.getElementById("room-code-label").addEventListener("click", async () => {
   const link = `${location.origin}${location.pathname}#${roomCode}`;
@@ -779,7 +799,7 @@ document.getElementById("btn-add-chips").addEventListener("click", () => {
 });
 
 document.getElementById("btn-start").addEventListener("click", startHand);
-document.getElementById("btn-take-seat").addEventListener("click", takeSeat);
+document.getElementById("btn-take-seat").addEventListener("click", () => withBusy("btn-take-seat", takeSeat));
 document.getElementById("btn-leave").addEventListener("click", leaveTable);
 document.getElementById("btn-leave-spec").addEventListener("click", leaveTable);
 
@@ -823,7 +843,7 @@ document.getElementById("btn-remove-player").addEventListener("click", () => {
 });
 document.getElementById("remove-cancel").addEventListener("click", () => removeModal.classList.add("hidden"));
 
-document.getElementById("join-code").addEventListener("keydown", (e) => { if (e.key === "Enter") joinRoom(); });
+document.getElementById("join-code").addEventListener("keydown", (e) => { if (e.key === "Enter") withBusy("join-btn", joinRoom); });
 document.getElementById("raise-amount").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("btn-raise").click(); });
 document.getElementById("chips-amount").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("btn-add-chips").click(); });
 
