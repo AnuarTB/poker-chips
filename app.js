@@ -526,6 +526,42 @@ function doAddChips(amount) {
   });
 }
 
+// ---------- host controls (spectator console) ----------
+function setBlinds(sb, bb) {
+  runTransaction(roomRef(roomCode), (room) => {
+    if (!room) return room;
+    room.small_blind = sb;
+    room.big_blind = bb;
+    if (!isPlayable(room)) room.min_raise = bb; // keep min-raise sane between hands
+    room.log = pushLog(room.log, `Blinds set to ${money(sb)}/${money(bb)} (from next hand)`);
+    return room;
+  });
+}
+
+function removePlayer(id) {
+  runTransaction(roomRef(roomCode), (room) => {
+    if (!room || !room.players || !room.players[id]) return room;
+    const name = room.players[id].name;
+    const live = isPlayable(room);
+    const wasTheirTurn = live && room.current_turn === id;
+    // Work out who acts next BEFORE deleting (needs their seat position).
+    const nextTurn = wasTheirTurn ? nextToAct(room, id) : null;
+
+    delete room.players[id];
+    room.log = pushLog(room.log, `${name} was removed from the table`);
+
+    if (live) {
+      if (liveIds(room).length <= 1) {
+        autoAwardLast(room);
+      } else if (wasTheirTurn) {
+        if (nextTurn && room.players[nextTurn]) room.current_turn = nextTurn;
+        else advanceStreet(room);
+      }
+    }
+    return room;
+  });
+}
+
 function awardPot(winnerIds) {
   runTransaction(roomRef(roomCode), (room) => {
     if (!room) return room;
@@ -636,7 +672,13 @@ function render() {
   document.getElementById("spectator-banner").classList.toggle("hidden", !isSpectator);
   document.getElementById("action-panel").classList.toggle("hidden", isSpectator);
   document.querySelector(".hand-controls").classList.toggle("hidden", isSpectator);
-  if (isSpectator) return;
+  if (isSpectator) {
+    const sb = money(room.small_blind || 0);
+    const bb = money(room.big_blind || 0);
+    document.getElementById("btn-raise-blinds").textContent = `Blinds ${sb}/${bb}`;
+    document.getElementById("btn-remove-player").disabled = Object.keys(room.players || {}).length === 0;
+    return;
+  }
 
   // Action panel — enabled only on your turn.
   document.getElementById("action-panel").classList.toggle("disabled", !myTurn);
@@ -706,6 +748,46 @@ document.getElementById("btn-add-chips").addEventListener("click", () => {
 
 document.getElementById("btn-start").addEventListener("click", startHand);
 document.getElementById("btn-take-seat").addEventListener("click", takeSeat);
+
+// --- host: adjust blinds ---
+const blindsModal = document.getElementById("blinds-modal");
+document.getElementById("btn-raise-blinds").addEventListener("click", () => {
+  if (!latestState) return;
+  document.getElementById("modal-sb").value = latestState.small_blind || 0;
+  document.getElementById("modal-bb").value = latestState.big_blind || 0;
+  blindsModal.classList.remove("hidden");
+});
+document.getElementById("blinds-cancel").addEventListener("click", () => blindsModal.classList.add("hidden"));
+document.getElementById("blinds-confirm").addEventListener("click", () => {
+  const bb = Math.max(1, Number(document.getElementById("modal-bb").value) || 0);
+  const sb = Math.max(0, Number(document.getElementById("modal-sb").value) || 0);
+  blindsModal.classList.add("hidden");
+  setBlinds(sb, bb);
+});
+
+// --- host: remove player ---
+const removeModal = document.getElementById("remove-modal");
+document.getElementById("btn-remove-player").addEventListener("click", () => {
+  if (!latestState) return;
+  const list = document.getElementById("remove-players-list");
+  list.innerHTML = "";
+  for (const p of playersArray()) {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.className = "remove-row";
+    btn.textContent = `Remove ${p.name} (${money(p.stack)})`;
+    btn.addEventListener("click", () => {
+      if (confirm(`Remove ${p.name} from the table?`)) {
+        removePlayer(p.id);
+        removeModal.classList.add("hidden");
+      }
+    });
+    li.appendChild(btn);
+    list.appendChild(li);
+  }
+  removeModal.classList.remove("hidden");
+});
+document.getElementById("remove-cancel").addEventListener("click", () => removeModal.classList.add("hidden"));
 
 document.getElementById("join-code").addEventListener("keydown", (e) => { if (e.key === "Enter") joinRoom(); });
 document.getElementById("raise-amount").addEventListener("keydown", (e) => { if (e.key === "Enter") document.getElementById("btn-raise").click(); });

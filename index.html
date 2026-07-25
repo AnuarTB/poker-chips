@@ -69,8 +69,12 @@
   </div>
 
   <div id="spectator-banner" class="card spectator-banner hidden">
-    <span>&#128065; You're watching as a spectator</span>
-    <button id="btn-take-seat" class="ghost">Take a seat</button>
+    <span class="spectator-label">&#128065; Spectator / host controls</span>
+    <div class="spectator-actions">
+      <button id="btn-raise-blinds" class="ghost">Raise Blinds</button>
+      <button id="btn-remove-player" class="ghost">Remove Player</button>
+      <button id="btn-take-seat" class="ghost">Take a seat</button>
+    </div>
   </div>
 
   <section class="players-section">
@@ -101,6 +105,32 @@
   <div class="card log-card">
     <h3><span class="ico">&#128220;</span> Activity</h3>
     <ul id="log-list"></ul>
+  </div>
+</div>
+
+<div id="blinds-modal" class="modal hidden">
+  <div class="modal-content">
+    <h3>&#128176; Adjust blinds</h3>
+    <label for="modal-sb">Small blind</label>
+    <input id="modal-sb" type="number" min="0" inputmode="numeric" />
+    <label for="modal-bb">Big blind</label>
+    <input id="modal-bb" type="number" min="1" inputmode="numeric" />
+    <p class="modal-note">Applies from the next hand dealt.</p>
+    <div class="modal-actions">
+      <button id="blinds-cancel" class="secondary subtle">Cancel</button>
+      <button id="blinds-confirm" class="primary">Save Blinds</button>
+    </div>
+  </div>
+</div>
+
+<div id="remove-modal" class="modal hidden">
+  <div class="modal-content">
+    <h3>&#10060; Remove a player</h3>
+    <ul id="remove-players-list"></ul>
+    <p class="modal-note">Removed mid-hand, their chips stay in the pot.</p>
+    <div class="modal-actions">
+      <button id="remove-cancel" class="secondary subtle">Close</button>
+    </div>
   </div>
 </div>
 
