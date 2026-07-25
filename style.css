@@ -304,6 +304,8 @@ button.ghost {
 }
 .player-name .tag.fold-tag { background: var(--red); color: #fff; }
 .player-name .tag.dealer-tag { background: #fff; color: #1c1c1c; }
+.player-name .tag.sb-tag { background: #4a86c5; color: #fff; }
+.player-name .tag.bb-tag { background: #7b5ec7; color: #fff; }
 .player-name .tag.allin-tag { background: var(--green); color: #fff; }
 
 .player-right { text-align: right; white-space: nowrap; }

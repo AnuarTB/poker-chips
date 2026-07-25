@@ -166,6 +166,8 @@ async function createRoom() {
     min_raise: bb,
     phase: "lobby",
     dealer_id: null,
+    sb_id: null,
+    bb_id: null,
     current_turn: null,
     last_raiser: null,
     hand_no: 0,
@@ -321,6 +323,8 @@ function startHand() {
       utg = seats[(di + 3) % n];
     }
 
+    room.sb_id = sbId;
+    room.bb_id = bbId;
     room.pot = 0;
     postBlind(room, sbId, room.small_blind || 0);
     postBlind(room, bbId, room.big_blind || 0);
@@ -593,8 +597,15 @@ function render() {
     li.className = classes.join(" ");
 
     const badges = [];
-    if (room.dealer_id === p.id && (playing || room.phase === "showdown")) {
+    const showPos = playing || room.phase === "showdown";
+    if (showPos && room.dealer_id === p.id) {
       badges.push('<span class="tag dealer-tag" title="Dealer button">D</span>');
+    }
+    if (showPos && room.sb_id === p.id) {
+      badges.push('<span class="tag sb-tag" title="Small blind">SB</span>');
+    }
+    if (showPos && room.bb_id === p.id) {
+      badges.push('<span class="tag bb-tag" title="Big blind">BB</span>');
     }
     if (p.id === myPlayerId) badges.push('<span class="tag">YOU</span>');
     if (p.folded) badges.push('<span class="tag fold-tag">FOLDED</span>');
