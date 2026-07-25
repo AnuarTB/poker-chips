@@ -330,11 +330,6 @@ button.ghost {
 
 .hand-controls { display: grid; gap: 10px; }
 .hand-controls .primary.start { margin-top: 0; }
-.hand-controls .leave {
-  color: #ff9b9b;
-  border-color: rgba(209, 73, 91, 0.4);
-}
-.hand-controls .leave:not(:disabled):hover { background: rgba(209, 73, 91, 0.15); }
 
 .blind-row { display: flex; gap: 12px; }
 .blind-row > div { flex: 1; }
